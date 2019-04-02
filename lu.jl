@@ -36,18 +36,19 @@ function backward_substitution(L, b)
     return x
 end
 
-function lu_factorization(A::AbstractMatrix)
+
+function lu_factorization(A::StridedMatrix{T}) where T
     n, m = size(A)
     @assert n == m
     L = Matrix{Float64}(I, n, n)
     U = copy(A)
     @inbounds begin
         for k = 1:n-1
-                # L[j,k] = U[j,k] / U[k,k]
-            Ukkinv = inv(U[k,k])
             for j = k+1:n
-                L[j,k] = U[j,k] * Ukkinv  # U[k,k]
-                for l = k:n
+                L[j,k] = U[j,k] * inv(U[k,k])  # U[k,k]
+            end
+            for l = k:n
+                for j = k+1:n
                     U[j,l] = U[j,l] - L[j,k] * U[k,l]
                 end
             end

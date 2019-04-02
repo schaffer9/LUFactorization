@@ -11,14 +11,13 @@ function run_benchmark_lu_fac()
     # for compilation
     time_solve_lower_tri_sys(10)
 
-    sizes = 100:100:2000
+    sizes = 100:100:1000
 
     ts = Float64[]
     factorization_errors = Float64[]
     for n in sizes
         # calculate time for each n
         A, _lu, t = time_lu_fac(n)
-
         push!(ts, t)
         # calculate errors
         push!(factorization_errors, factorization_error(_lu, A))
