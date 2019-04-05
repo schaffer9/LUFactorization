@@ -11,7 +11,7 @@ function run_benchmark_lu_fac()
     # for compilation
     time_solve_lower_tri_sys(10)
 
-    sizes = 100:100:1000
+    sizes = 100:100:3000
 
     ts = Float64[]
     factorization_errors = Float64[]
