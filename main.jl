@@ -18,7 +18,8 @@ max_size is the maximal problem size
 function main(args)
     directory_path = isempty(args) ? "." : args[1]
     directory_path = abspath(directory_path)
-
+    mkpath(directory_path)
+    
     if length(args) >= 2
         num_blas_thread = parse(Int, args[2])
     else
