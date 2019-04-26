@@ -1,4 +1,4 @@
-using CSV, DataFrames
+using DataFrames
 
 function create_lower_tri_sys(n)
     L = LowerTriangular(rand(n, n))
@@ -55,7 +55,7 @@ function time_lu_fac(n; blocked=true, block_size=100)
     return A, sol[1], sol[2]
 end
 
-function run_benchmark_backward_sub(sizes::AbstractArray{<:Int, 1}, file_path::String)
+function run_benchmark_backward_sub(sizes::AbstractArray{<:Int, 1})
     # for compilation
     time_solve_upper_tri_sys(10)
 
@@ -74,11 +74,12 @@ function run_benchmark_backward_sub(sizes::AbstractArray{<:Int, 1}, file_path::S
     data = DataFrame(size=sizes, time=ts, backward_error=backward_errors, residual_norm=residual_norms)
 
     # save time to csv
-    CSV.write(file_path, data, writeheaders=true)
+    # CSV.write(file_path, data, writeheaders=true)
+    return data
 end
 
 
-function run_benchmark_forward_sub(sizes::AbstractArray{<:Int, 1}, file_path::String)
+function run_benchmark_forward_sub(sizes::AbstractArray{<:Int, 1})
     # for compilation
     time_solve_lower_tri_sys(10)
 
@@ -96,10 +97,11 @@ function run_benchmark_forward_sub(sizes::AbstractArray{<:Int, 1}, file_path::St
     end
     data = DataFrame(size=sizes, time=ts, forward_error=forward_errors, residual_norm=residual_norms)
     # save time to csv
-    CSV.write(file_path, data, writeheaders=true)
+    # SV.write(file_path, data, writeheaders=true)
+    return data
 end
 
-function run_benchmark_lu_fac(sizes::AbstractArray{<:Int, 1}, file_path::String; blocked=true, block_size=100)
+function run_benchmark_lu_fac(sizes::AbstractArray{<:Int, 1}; blocked=true, block_size=100)
     # for compilation
     time_lu_fac(100; blocked=blocked, block_size=block_size)
 
@@ -107,13 +109,51 @@ function run_benchmark_lu_fac(sizes::AbstractArray{<:Int, 1}, file_path::String;
     factorization_errors = Float64[]
     for n in sizes
         # calculate time for each n
-        A, _lu, t = time_lu_fac(n; blocked=blocked, block_size=block_size)
-        push!(ts, t)
+        t_av = 0
+        err_av = 0
+        for i = 1:5
+            A, _lu, t = time_lu_fac(n; blocked=blocked, block_size=block_size)
+            t_av += t
+            err_av += factorization_error(_lu, A)
+        end
+        err_av /= 5
+        t_av /= 5
+
+        push!(ts, t_av)
         # calculate errors
-        push!(factorization_errors, factorization_error(_lu, A))
+        push!(factorization_errors, err_av)
     end
     data = DataFrame(size=sizes, time=ts, factorization_error=factorization_errors)
 
     # save time to csv
-    CSV.write(file_path, data, writeheaders=true)
+    # CSV.write(file_path, data, writeheaders=true)
+    return data
+end
+
+function run_benchmark_blocked_lu_fac(s::Integer, block_sizes::AbstractArray{<:Int, 1}=10:10:500)
+    # for compilation
+    time_lu_fac(100; blocked=true, block_size=100)
+
+    ts = Float64[]
+    factorization_errors = Float64[]
+    for block_size in block_sizes
+        # calculate time for each n
+        t_av = 0
+        err_av = 0
+        for i = 1:20
+            A, _lu, t = time_lu_fac(s; blocked=true, block_size=block_size)
+            t_av += t
+            err_av += factorization_error(_lu, A)
+        end
+        err_av /= 20
+        t_av /= 20
+        push!(ts, t_av)
+        # calculate errors
+        push!(factorization_errors, err_av)
+    end
+    data = DataFrame(size=fill(s, length(ts)), time=ts, block_size=block_sizes, factorization_error=factorization_errors)
+
+    # save time to csv
+    # CSV.write(file_path, data, writeheaders=true)
+    return data
 end
