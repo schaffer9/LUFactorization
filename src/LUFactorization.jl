@@ -53,5 +53,5 @@ include("substitution.jl")
 export lu_solve, lu_solve!
 
 include("lu_benchmark_tools.jl")
-export run_benchmark_lu_fac, run_benchmark_forward_sub, run_benchmark_backward_sub, run_benchmark_blocked_lu_fac
+export run_benchmark_lu_fac
 end # module
