@@ -46,6 +46,8 @@ function main(parsed_args)
     mkpath(directory_path)
     file_path = joinpath(parsed_args["path"])
 
+    BLAS.set_num_threads(parsed_args["threads"])
+
     result = run_benchmark_lu_fac(
         size;
         blocked=parsed_args["blocked"],
