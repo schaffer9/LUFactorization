@@ -50,8 +50,8 @@ forward_substitution(L::AbstractMatrix, b::AbstractArray) = forward_substitution
 backward_substitution(U::AbstractMatrix, b::AbstractArray) = backward_substitution!(U, copy(b))
 
 function _solve!(F::LUFac{T}, b::AbstractArray{T}) where T<:AbstractFloat
-    BLAS.trsv!('L', 'N', 'U', F.lu, bp)
-    BLAS.trsv!('U', 'N', 'N', F.lu, bp)
+    BLAS.trsv!('L', 'N', 'U', F.lu, b)
+    BLAS.trsv!('U', 'N', 'N', F.lu, b)
 end
 
 
